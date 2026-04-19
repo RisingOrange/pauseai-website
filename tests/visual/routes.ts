@@ -1,4 +1,4 @@
-import { readdirSync, statSync } from 'node:fs'
+import { readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -36,11 +36,10 @@ const POST_SAMPLES = [
 
 function discoverRouteDirs(): string[] {
 	const routes: string[] = ['/']
-	for (const entry of readdirSync(ROUTES_DIR)) {
-		if (EXCLUDE_ROUTE_DIRS.has(entry)) continue
-		const full = join(ROUTES_DIR, entry)
-		if (!statSync(full).isDirectory()) continue
-		routes.push('/' + entry)
+	for (const entry of readdirSync(ROUTES_DIR, { withFileTypes: true })) {
+		if (!entry.isDirectory()) continue
+		if (EXCLUDE_ROUTE_DIRS.has(entry.name)) continue
+		routes.push('/' + entry.name)
 	}
 	return routes
 }
