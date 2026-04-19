@@ -1,6 +1,7 @@
 import type { NewsItem } from '$lib/types'
 import { generateCacheControlRecord } from '$lib/utils'
 import { json } from '@sveltejs/kit'
+import { env } from '$env/dynamic/private'
 import type { PostsApiResponse } from '$api/posts/+server.js'
 import type { RequestHandler } from './$types'
 
@@ -35,7 +36,7 @@ async function getInternalNews(localFetch: typeof fetch): Promise<NewsItem[]> {
 async function getSubstackNews(): Promise<NewsItem[]> {
 	// Visual regression tests (Chromatic) set this so homepage snapshots don't
 	// churn every time a new Substack post is published.
-	if (process.env.VISUAL_TEST === '1') return []
+	if (env.VISUAL_TEST === '1') return []
 	try {
 		const response = await fetch('https://pauseai.substack.com/feed')
 		const xml = await response.text()
