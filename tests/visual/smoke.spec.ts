@@ -1,4 +1,4 @@
-import { test } from '@chromatic-com/playwright'
+import { test, expect } from '@chromatic-com/playwright'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -25,6 +25,12 @@ test.describe('routes', () => {
 				throw new Error(`${path} returned ${response?.status() ?? 'no response'}`)
 			}
 			await page.evaluate(() => document.fonts.ready)
+			// Self-validate the /api/news mock is actually being used — otherwise the
+			// suite would quietly capture live Substack data if the route pattern
+			// stopped matching (e.g. if news ever moved to SSR).
+			if (path === '/') {
+				await expect(page.getByText('Sample news item one')).toBeVisible()
+			}
 			await page.screenshot({ fullPage: true, path: testInfo.outputPath('full-page.png') })
 		})
 	}
