@@ -27,8 +27,6 @@ jobs:
         run: cp template.env .env
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
-      - name: Compile Paraglide
-        run: pnpm inlang:settings
       - name: Cache Playwright browsers
         uses: actions/cache@v4
         with:
