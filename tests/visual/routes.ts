@@ -17,7 +17,7 @@ const EXCLUDE_ROUTES = new Set([
 	'/quotes', // ~22,000px tall — exceeds Chromatic's 25M-pixel snapshot cap
 	'/posts', // chronological listing; every new post would produce a noise diff
 	'/communities' // embeds Mapbox + Luma iframes — third-party content churn
-	// /sayno top-level is included; /sayno/[id] has random IDs but isn't prerendered
+	// /sayno top-level is included; /sayno/share is included via recursive walk
 ])
 
 function hasPage(dir: string): boolean {
@@ -35,16 +35,21 @@ const POST_SAMPLES = [
 	'/learn' // long-form with many headings
 ]
 
-function discoverRouteDirs(): string[] {
-	const routes: string[] = ['/']
-	for (const entry of readdirSync(ROUTES_DIR, { withFileTypes: true })) {
+function walk(dir: string, prefix: string, out: string[]): void {
+	if (hasPage(dir)) {
+		const route = prefix || '/'
+		if (!EXCLUDE_ROUTES.has(route)) out.push(route)
+	}
+	for (const entry of readdirSync(dir, { withFileTypes: true })) {
 		if (!entry.isDirectory()) continue
 		if (entry.name.startsWith('[')) continue // dynamic segment, can't visit directly
-		if (!hasPage(join(ROUTES_DIR, entry.name))) continue
-		const route = '/' + entry.name
-		if (EXCLUDE_ROUTES.has(route)) continue
-		routes.push(route)
+		walk(join(dir, entry.name), prefix + '/' + entry.name, out)
 	}
+}
+
+function discoverRouteDirs(): string[] {
+	const routes: string[] = []
+	walk(ROUTES_DIR, '', routes)
 	return routes
 }
 
