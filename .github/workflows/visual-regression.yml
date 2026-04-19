@@ -1,4 +1,4 @@
-name: Visual regression (Chromatic)
+name: Visual diff (Chromatic)
 
 on:
   push:
