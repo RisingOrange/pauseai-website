@@ -66,7 +66,7 @@ html {
 	color-scheme: light;
 
 	--brand: var(--brand-light);
-	--brand-subtle: hsl(32, 100%, 35%);
+	--brand-subtle: hsl(210, 100%, 45%); /* DEMO: shifted to blue to exercise Chromatic diffing */
 	--text: black;
 	--bg-secondary: white;
 }
