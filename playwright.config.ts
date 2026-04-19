@@ -4,9 +4,10 @@ export default defineConfig({
 	testDir: 'tests/visual',
 	forbidOnly: !!process.env.CI,
 	retries: process.env.CI ? 1 : 0,
-	reporter: [['list']],
+	reporter: [['list'], ['html', { open: 'never' }]],
 	use: {
-		baseURL: 'http://localhost:4173'
+		baseURL: 'http://localhost:4173',
+		screenshot: 'on'
 	},
 	projects: [
 		{
