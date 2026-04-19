@@ -14,7 +14,8 @@ const EXCLUDE_ROUTES = new Set([
 	'/uk-email-mp', // form flow
 	'/contact-us', // form state
 	'/chat', // OpenAI-dependent
-	'/quotes' // ~22,000px tall — exceeds Chromatic's 25M-pixel snapshot cap
+	'/quotes', // ~22,000px tall — exceeds Chromatic's 25M-pixel snapshot cap
+	'/posts' // chronological listing; every new post would produce a noise diff
 	// /sayno top-level is included; /sayno/[id] has random IDs but isn't prerendered
 ])
 

@@ -41,6 +41,8 @@ jobs:
       - name: Run Playwright tests
         run: pnpm exec playwright test
       - name: Publish to Chromatic
+        # Fork PRs can't read repo secrets — skip cleanly instead of failing.
+        if: github.event_name == 'push' || github.event.pull_request.head.repo.full_name == github.repository
         uses: chromaui/action@v1
         with:
           playwright: true
