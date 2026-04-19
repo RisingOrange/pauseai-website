@@ -31,7 +31,8 @@ test.describe('routes', () => {
 			if (path === '/') {
 				await expect(page.getByText('Sample news item one')).toBeVisible()
 			}
-			await page.screenshot({ fullPage: true, path: testInfo.outputPath('full-page.png') })
+			const screenshot = await page.screenshot({ fullPage: true })
+			await testInfo.attach('full-page', { body: screenshot, contentType: 'image/png' })
 		})
 	}
 })
