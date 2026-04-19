@@ -36,6 +36,8 @@ jobs:
       - name: Run Playwright tests
         run: pnpm exec playwright test
       - name: Publish to Chromatic
-        run: pnpm exec chromatic --playwright --exit-zero-on-changes
-        env:
-          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+        uses: chromaui/action@latest
+        with:
+          playwright: true
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          exitZeroOnChanges: true
