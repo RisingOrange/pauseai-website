@@ -15,7 +15,7 @@ export default defineConfig({
 		},
 		{
 			name: 'mobile',
-			use: { ...devices['Pixel 5'], viewport: { width: 393, height: 851 } }
+			use: { ...devices['Pixel 7'], viewport: { width: 412, height: 915 } }
 		}
 	],
 	webServer: {
