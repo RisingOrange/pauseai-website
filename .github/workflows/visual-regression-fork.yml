@@ -1,0 +1,78 @@
+name: Visual diff (fork PR, gated)
+
+# Runs Chromatic for fork PRs after maintainer approval.
+#
+# `pull_request_target` exposes repo secrets, so arbitrary fork code must not
+# execute unreviewed. The `chromatic-fork` environment (configured in repo
+# settings with required reviewers) blocks the job until a maintainer
+# approves the run. Only after approval does the fork's code get checked out
+# and built.
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: visual-regression-fork-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  chromatic:
+    if: github.event.pull_request.head.repo.full_name != github.repository
+    runs-on: ubuntu-latest
+    environment: chromatic-fork
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v5
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'pnpm'
+      - name: Copy environment file
+        run: cp template.env .env
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Cache imagetools transforms
+        uses: actions/cache@v4
+        with:
+          path: node_modules/.cache/imagetools
+          key: imagetools-${{ runner.os }}-${{ hashFiles('src/**/*.{png,jpg,jpeg,webp,avif,svg}', 'static/**/*.{png,jpg,jpeg,webp,avif,svg}') }}
+          restore-keys: |
+            imagetools-${{ runner.os }}-
+      - name: Cache Playwright browsers
+        id: playwright-cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            playwright-${{ runner.os }}-
+      - name: Install Playwright (browser + deps on cache miss)
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright system deps (cache hit)
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
+      - name: Run Playwright tests
+        run: pnpm exec playwright test
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 14
+      - name: Publish to Chromatic
+        uses: chromaui/action@v1
+        with:
+          playwright: true
+          projectToken: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          exitZeroOnChanges: true
+          exitOnceUploaded: true
