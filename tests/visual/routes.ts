@@ -18,7 +18,8 @@ const EXCLUDE_ROUTE_DIRS = new Set([
 	'verify', // token-dependent
 	'uk-email-mp', // form flow
 	'contact-us', // form state
-	'chat' // OpenAI-dependent
+	'chat', // OpenAI-dependent
+	'quotes' // ~22,000px tall — exceeds Chromatic's 25M-pixel snapshot cap
 	// /sayno top-level is included; /sayno/[id] has random IDs but isn't prerendered
 ])
 
