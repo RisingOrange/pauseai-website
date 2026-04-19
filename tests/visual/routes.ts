@@ -47,3 +47,9 @@ function discoverRouteDirs(): string[] {
 }
 
 export const ROUTES = [...discoverRouteDirs(), ...POST_SAMPLES].sort()
+
+if (ROUTES.length < 5) {
+	throw new Error(
+		`Visual route discovery found only ${ROUTES.length} routes — src/routes/ probably moved`
+	)
+}
