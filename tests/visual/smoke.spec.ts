@@ -1,4 +1,4 @@
-import { test, expect } from '@chromatic-com/playwright'
+import { test } from '@chromatic-com/playwright'
 import { readFileSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -29,7 +29,7 @@ test.describe('routes', () => {
 			// suite would quietly capture live Substack data if the route pattern
 			// stopped matching (e.g. if news ever moved to SSR).
 			if (path === '/') {
-				await expect(page.getByText('Sample news item one')).toBeVisible()
+				await page.getByText('Sample news item one').waitFor({ state: 'visible', timeout: 5000 })
 			}
 			const screenshot = await page.screenshot({ fullPage: true })
 			await testInfo.attach('full-page', { body: screenshot, contentType: 'image/png' })
