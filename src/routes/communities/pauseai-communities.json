@@ -118,7 +118,7 @@
 			"name": "Berlin",
 			"lat": 52.52,
 			"lon": 13.405,
-			"link": "https://t.me/+12wemb6BZuQyNjVi",
+			"link": "https://t.me/+3kzDVULswtdkMTIy",
 			"parent_name": "Germany"
 		},
 		{
@@ -595,13 +595,6 @@
 			"link": "https://line.me/ti/g2/rrV7AC9zmKz802Yk-BvJcyb7fHdppCtDQ1RGxQ?utm_source=invitation&utm_medium=link_copy&utm_campaign=default"
 		},
 		{
-			"name": "Umeå",
-			"lat": 63.8258,
-			"lon": 20.263,
-			"link": "$$DISCORD_GLOBAL$$",
-			"parent_name": "Sweden"
-		},
-		{
 			"name": "Astana",
 			"lat": 51.1694,
 			"lon": 71.4491,
@@ -646,6 +639,25 @@
 			"lon": -90.3712,
 			"link": "mailto:hartwagle@gmail.com",
 			"parent_name": "United States"
+		},
+		{
+			"name": "Dhaka",
+			"lat": 23.8103,
+			"lon": 90.4125,
+			"link": "$$DISCORD_GLOBAL$$"
+		},
+		{
+			"name": "Stuttgart-Tübingen",
+			"lat": 48.6487,
+			"lon": 9.1202,
+			"link": "$$DISCORD_GLOBAL$$",
+			"parent_name": "Germany"
+		},
+		{
+			"name": "Potchefstroom",
+			"lat": -26.7167,
+			"lon": 27.1,
+			"link": "$$DISCORD_GLOBAL$$"
 		}
 	]
 }

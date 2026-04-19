@@ -2,20 +2,20 @@
 	import Toc from 'svelte-toc'
 	import X from 'lucide-svelte/icons/x'
 	import List from 'lucide-svelte/icons/list'
-	import '$lib/components/Card.css'
+	import Card from '$lib/components/Card.svelte'
 	import Backdrop from '$lib/components/Backdrop.svelte'
 	import { onMount } from 'svelte'
 
 	let desktop: boolean | undefined
 	let open: boolean | undefined
 	let headings: HTMLHeadingElement[] | undefined
-	let sidebarTop = 16 // Initial top offset in rem (below banner)
+	const maxTop = 14
+	let sidebarTop = maxTop // Initial top offset in rem (below banner)
 
 	// Track scroll to adjust sidebar position
 	onMount(() => {
 		const bannerHeight = 275 // Scroll distance in pixels for full transition (higher = slower)
 		const minTop = 1 // Minimum top value in rem when scrolled past banner
-		const maxTop = 16 // Maximum top value in rem when at page top
 
 		function handleScroll() {
 			const scrollY = window.scrollY
@@ -64,9 +64,14 @@
 
 <!-- Desktop: Fixed sidebar on the left -->
 {#if desktop}
-	<div class="desktop-toc-wrapper" style="top: {sidebarTop}rem;" use:autoScroll>
+	<div
+		class="desktop-toc-wrapper"
+		class:hidden={(headings?.length ?? 0) <= 2}
+		style="top: {sidebarTop}rem;"
+		use:autoScroll
+	>
 		<Toc
-			headingSelector=":is(h2, h3, h4):not(.toc-exclude):not(footer *)"
+			headingSelector=":is(h2, h3, h4):not(.toc-exclude):not(footer *):not(.tabs *):not(.tab-content *)"
 			title="Contents"
 			bind:headings
 			hide={(headings?.length ?? 0) <= 2}
@@ -81,32 +86,38 @@
 {/if}
 
 <!-- Mobile: Floating button with popup (hidden on desktop) -->
-<div class="toc-wrapper card" class:hidden-on-desktop={desktop}>
-	<Toc
-		headingSelector=":is(h2, h3, h4):not(.toc-exclude):not(footer *)"
-		title="Contents"
-		breakpoint={1250}
-		bind:open
-		bind:desktop
-		bind:headings
-		hide={(headings?.length ?? 0) <= 1}
-	>
-		<svelte:fragment slot="open-toc-icon">
-			<List size="2rem" />
-		</svelte:fragment>
-		<svelte:fragment slot="title">
-			<div class="toc-head">
-				<h2 class="toc-title-heading toc-exclude">Contents</h2>
-				<button
-					class="toc-close"
-					on:click={() => (open = false)}
-					aria-label="Close table of contents"
-				>
-					<X size="1.2rem" />
-				</button>
-			</div>
-		</svelte:fragment>
-	</Toc>
+<div
+	class="toc-wrapper"
+	class:hidden-on-desktop={desktop}
+	class:hidden={(headings?.length ?? 0) <= 1}
+>
+	<Card>
+		<Toc
+			headingSelector=":is(h2, h3, h4):not(.toc-exclude):not(footer *):not(.tabs *):not(.tab-content *)"
+			title="Contents"
+			breakpoint={1250}
+			bind:open
+			bind:desktop
+			bind:headings
+			hide={(headings?.length ?? 0) <= 1}
+		>
+			<svelte:fragment slot="open-toc-icon">
+				<List size="2rem" />
+			</svelte:fragment>
+			<svelte:fragment slot="title">
+				<div class="toc-head">
+					<h2 class="toc-title-heading toc-exclude">Contents</h2>
+					<button
+						class="toc-close"
+						on:click={() => (open = false)}
+						aria-label="Close table of contents"
+					>
+						<X size="1.2rem" />
+					</button>
+				</div>
+			</svelte:fragment>
+		</Toc>
+	</Card>
 </div>
 
 <style>
@@ -184,6 +195,10 @@
 	/* Hide mobile wrapper on desktop */
 	.hidden-on-desktop {
 		display: none;
+	}
+
+	.hidden {
+		display: none !important;
 	}
 
 	/* Mobile styles */

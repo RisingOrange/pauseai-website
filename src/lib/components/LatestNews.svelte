@@ -1,19 +1,20 @@
 <script lang="ts">
 	import type { NewsItem } from '$lib/types'
+	import type { NewsApiResponse } from '$api/news/+server'
 	import NewsCard from '$lib/components/NewsCard.svelte'
 	import { onMount } from 'svelte'
 
-	let newsItems: NewsItem[] = []
 	let loading = true
 	let currentPage = 1
 	let totalPages = 1
 	const pageSize = 6
+	let newsItems: NewsItem[] = Array.from({ length: pageSize })
 
 	async function loadPage(page: number) {
 		loading = true
 		try {
 			const response = await fetch(`/api/news?page=${page}&pageSize=${pageSize}`)
-			const data = await response.json()
+			const data = (await response.json()) as NewsApiResponse
 			newsItems = data.items
 			currentPage = data.page
 			totalPages = data.totalPages
@@ -26,22 +27,20 @@
 
 	function goToPage(page: number) {
 		if (page >= 1 && page <= totalPages) {
-			loadPage(page)
+			void loadPage(page)
 		}
 	}
 
-	onMount(() => loadPage(1))
+	onMount(() => void loadPage(1))
 </script>
 
 <section class="latest-news" data-pagefind-ignore>
 	<h2 class="section-title toc-exclude">Latest</h2>
 
-	{#if loading}
-		<div class="loading">Loading news...</div>
-	{:else if newsItems.length > 0}
+	{#if newsItems.length > 0}
 		<div class="news-grid">
 			{#each newsItems as item}
-				<NewsCard {item} />
+				<NewsCard {item} {loading} imageSizes="500px" />
 			{/each}
 		</div>
 
@@ -97,12 +96,6 @@
 		display: grid;
 		grid-template-columns: repeat(3, 1fr);
 		gap: 1.5rem;
-	}
-
-	.loading {
-		text-align: center;
-		padding: 2rem;
-		opacity: 0.6;
 	}
 
 	.pagination {

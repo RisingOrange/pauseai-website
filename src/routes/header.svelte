@@ -4,15 +4,20 @@
 	import LanguageSwitcher from '$lib/components/LanguageSwitcher.svelte'
 	import * as m from '$lib/paraglide/messages.js'
 	import { botName } from '$lib/config'
+	import { searchOpen } from '$lib/stores/searchModal'
 	import SearchIcon from 'lucide-svelte/icons/search'
 
 	const enableBot = false
 
 	export let inverted = false
-	export let moveUp = false
+
+	const openSearch = (e: MouseEvent) => {
+		e.preventDefault()
+		searchOpen.set(true)
+	}
 </script>
 
-<Navbar {inverted} {moveUp}>
+<Navbar {inverted}>
 	<Navlink {inverted} first href="/learn">{m.header_learn()}</Navlink>
 	<Navlink {inverted} href="/proposal">{m.header_proposal()}</Navlink>
 	<Navlink {inverted} href="/communities">{m.header_events()}</Navlink>
@@ -25,5 +30,15 @@
 	<!-- <NavLink href="/about">About</NavLink> -->
 	<Navlink {inverted} c2a href="/join">{m.header_join()}</Navlink>
 	<LanguageSwitcher {inverted} />
-	<Navlink {inverted} href="/search" ariaLabel="Search"><SearchIcon size="0.8em" /></Navlink>
+	<button
+		id="search-button"
+		onclick={openSearch}
+		class="reset-button"
+		aria-label="Search"
+		data-hydrate-click
+	>
+		<Navlink {inverted}>
+			<SearchIcon size="0.8em" />
+		</Navlink>
+	</button>
 </Navbar>

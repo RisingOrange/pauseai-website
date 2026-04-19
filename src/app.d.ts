@@ -21,14 +21,16 @@ declare global {
 
 	interface Window {
 		twttr?: Twttr
+		selectBanners(): void
+		applyTheme(): void
 	}
-}
 
-declare module '*.md' {
-	import type { SvelteComponent } from 'svelte'
+	declare module '*.md' {
+		import type { SvelteComponent } from 'svelte'
 
-	export default class Comp extends SvelteComponent {
-		$$prop_def: Record<string, never>
+		export default class Comp extends SvelteComponent {
+			$$prop_def: Record<string, never>
+		}
+		export const metadata: Record<string, unknown>
 	}
-	export const metadata: Record<string, unknown>
 }

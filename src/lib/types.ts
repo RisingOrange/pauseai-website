@@ -1,6 +1,10 @@
-import type { EnhancedImgAttributes } from '@sveltejs/enhanced-img'
+import type { SvelteHTMLElements } from 'svelte/elements'
+import type { Attachment } from 'airtable'
+import type { DeepPartial } from './utils'
 
 export type Categories = 'sveltekit' | 'svelte' | 'AI Safety' | 'Transparency' | 'Government'
+
+export type LinkType = 'internal' | 'external' | 'mail'
 
 export type FrontmatterMeta = {
 	title: string
@@ -11,6 +15,7 @@ export type FrontmatterMeta = {
 	date?: string
 	categories?: Categories[]
 	image?: string
+	showImage?: boolean
 	/** If true, this post will appear in the Latest News section on the homepage */
 	news?: boolean
 }
@@ -25,9 +30,10 @@ export type NewsItem = {
 	subtitle: string
 	date: string
 	image?: string
+	outlet?: string
 	/** URL to the article (internal path or external URL) */
 	href: string
-	source: 'internal' | 'substack'
+	source: 'internal' | 'substack' | 'press'
 }
 
 export type Signatory = {
@@ -48,6 +54,17 @@ export type AirtableSignatory = {
 	duplicate?: boolean
 }
 
+export type AirtablePerson = {
+	'Full name': string
+	Bio2: string
+	Title?: string
+	Photo?: ReadonlyArray<DeepPartial<Attachment>>
+	Privacy: boolean
+	About: boolean
+	duplicate?: boolean
+	'About order'?: number
+}
+
 export type Person = {
 	id: string
 	name: string
@@ -60,25 +77,6 @@ export type Person = {
 	checked?: boolean
 	duplicate?: boolean
 	order?: number
-}
-
-export type Team = {
-	id: string
-	name: string
-	description: string
-	leadName: string
-	leadEmail: string
-	public: boolean
-	responsibilities: string[]
-}
-
-export type AirtableTeam = {
-	name: string
-	mission: string
-	name_from_lead: string
-	email_address_from_lead: string
-	responsibilities_names: string[]
-	public: boolean
 }
 
 export type NationalGroup = {
@@ -125,11 +123,12 @@ export type NationalGroupLink =
 	| 'lumaLink'
 	| 'substackLink'
 
-export type Picture = Exclude<EnhancedImgAttributes['src'], string>
+export type Picture = Exclude<SvelteHTMLElements['enhanced:img']['src'], string>
 
 export type CarouselQuote = {
 	text: string
 	author: string
 	title: string
 	image: Picture
+	href?: string
 }

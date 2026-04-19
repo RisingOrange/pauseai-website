@@ -102,7 +102,7 @@
 							console.log('Video metadata loaded')
 							if (stream && videoElement && !videoElement.srcObject) {
 								videoElement.srcObject = stream
-								videoElement.play()
+								void videoElement.play()
 							}
 						}}
 						use:connectStream
@@ -110,8 +110,8 @@
 						playsinline
 						muted
 						class="video-feed"
-					/>
-					<canvas bind:this={canvasElement} style="display: none;" />
+					></video>
+					<canvas bind:this={canvasElement} style="display: none;"></canvas>
 				</div>
 				<button class="capture-button primary" on:click={captureFromCamera} disabled={$isCapturing}>
 					{#if $isCapturing}
@@ -141,7 +141,7 @@
 							placeholder="your@email.com"
 							on:keypress={(e) => {
 								if (e.key === 'Enter' && emailValid) {
-									finalizeSubmission()
+									void finalizeSubmission()
 								}
 							}}
 						/>

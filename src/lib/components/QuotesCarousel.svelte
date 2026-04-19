@@ -22,24 +22,26 @@
 	import { onMount } from 'svelte'
 	import QuoteContent from './QuoteContent.svelte'
 
-	const MOBILE_NAVIGATION_DISTANCE_THRESHOLD = 10
 	const AUTOPLAY_INTERVAL = 10_000
 
 	let glide: Glide
 	let currentSlide: number | null = null
+	let isSwiping = false
 
 	const quotes: CarouselQuote[] = [
 		{
 			text: m.home_quotes_asi_statement_text(),
 			author: m.home_quotes_asi_statement_author(),
 			title: m.home_quotes_asi_statement_title(),
-			image: ASI_Statement
+			image: ASI_Statement,
+			href: 'https://superintelligence-statement.org/'
 		},
 		{
 			text: m.home_quotes_cais_text(),
 			author: m.home_quotes_cais_author(),
 			title: m.home_quotes_cais_title(),
-			image: CAIS
+			image: CAIS,
+			href: 'https://www.theguardian.com/technology/2023/may/30/risk-of-extinction-by-ai-should-be-global-priority-say-tech-experts'
 		},
 		{
 			text: m.home_quotes_hinton_text(),
@@ -51,7 +53,8 @@
 			text: m.home_quotes_hawking_text(),
 			author: 'Stephen Hawking',
 			title: m.home_quotes_hawking_title(),
-			image: Hawking
+			image: Hawking,
+			href: 'https://www.bbc.com/news/technology-30290540'
 		},
 		{
 			text: m.home_quotes_turing_text(),
@@ -78,49 +81,28 @@
 	onMount(() => {
 		glide = new Glide('.glide', {
 			autoplay: AUTOPLAY_INTERVAL
-		}).mount({ Controls, Images, Keyboard, Swipe, Autoplay })
-		currentSlide = glide.index
+		})
+
 		glide.on('move', () => {
 			currentSlide = glide.index
 		})
-		registerMobileNavigation()
-	})
 
-	type ClientCoordinates = { clientX: number; clientY: number }
-	let interactionStart: ClientCoordinates | null = null
-
-	function registerMobileNavigation() {
-		addEventListener('touchstart', (event) => (interactionStart = event.changedTouches[0]))
-		addEventListener('mousedown', (event) => (interactionStart = event))
-
-		const touchNavigationButtons = document.getElementsByClassName('touch-navigation')
-		window.addEventListener('click', (event) => {
-			if (!interactionStart) return
-			for (const touchNavigationButton of touchNavigationButtons) {
-				const boundingClientRect = touchNavigationButton.getBoundingClientRect()
-				if (
-					isInside(event, boundingClientRect) &&
-					calculateDistance(interactionStart, event) <= MOBILE_NAVIGATION_DISTANCE_THRESHOLD
-				) {
-					// HTMLElement#click bubbles, leading to recursion
-					return touchNavigationButton.dispatchEvent(new Event('click'))
-				}
-			}
+		glide.on('swipe.move', () => {
+			isSwiping = true
 		})
-	}
 
-	function isInside({ clientX, clientY }: ClientCoordinates, rect: DOMRect) {
-		return (
-			clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom
-		)
-	}
+		glide.on('swipe.end', () => {
+			setTimeout(() => {
+				isSwiping = false
+			}, 50)
+		})
 
-	function calculateDistance(from: ClientCoordinates, to: ClientCoordinates) {
-		return Math.hypot(to.clientX - from.clientX, to.clientY - from.clientY)
-	}
+		glide.mount({ Controls, Images, Keyboard, Swipe, Autoplay })
+		currentSlide = glide.index
+	})
 </script>
 
-<div class="glide">
+<div class="glide" class:is-swiping={isSwiping}>
 	<div class="glide__track" data-glide-el="track">
 		<ul class="glide__slides">
 			{#each quotes as quote}
@@ -131,15 +113,22 @@
 				</li>
 			{/each}
 		</ul>
-		<button class="reset-button touch-navigation left" on:click={() => glide.go('<')} />
-		<button class="reset-button touch-navigation right" on:click={() => glide.go('>')} />
 	</div>
 	<div class="navigation" data-glide-el="controls">
-		<button class="nav-button" data-glide-dir="<"><ArrowLeft size="1em" /></button>
+		<button class="nav-button" data-glide-dir="<" aria-label="Previous slide"
+			><ArrowLeft size="1em" /></button
+		>
 		{#each Array(totalSlides) as _, i}
-			<button class="dot reset-button" class:active={currentSlide === i} data-glide-dir={`=${i}`} />
+			<button
+				class="dot reset-button"
+				class:active={currentSlide === i}
+				data-glide-dir={`=${i}`}
+				aria-label={`Go to slide ${i + 1}`}
+			></button>
 		{/each}
-		<button class="nav-button" data-glide-dir=">"><ArrowRight size="1em" /></button>
+		<button class="nav-button" data-glide-dir=">" aria-label="Next slide"
+			><ArrowRight size="1em" /></button
+		>
 		<Link href="/quotes">{m.home_quotes_all()}</Link>
 	</div>
 </div>
@@ -156,22 +145,6 @@
 
 	.glide__slides {
 		overflow: unset;
-	}
-
-	.touch-navigation {
-		position: absolute;
-		top: 0;
-		width: 33%;
-		height: 100%;
-		pointer-events: none;
-	}
-
-	.touch-navigation.left {
-		left: 0;
-	}
-
-	.touch-navigation.right {
-		right: 0;
 	}
 
 	.navigation {
@@ -223,5 +196,9 @@
 
 	.dot:not(.active):hover {
 		transform: scale(1.2);
+	}
+
+	.is-swiping .quote {
+		pointer-events: none;
 	}
 </style>
