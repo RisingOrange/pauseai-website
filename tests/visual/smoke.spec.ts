@@ -19,12 +19,13 @@ test.describe('routes', () => {
 
 	for (const path of ROUTES) {
 		const name = path === '/' ? 'home' : path.slice(1).replace(/\//g, '-')
-		test(name, async ({ page }) => {
+		test(name, async ({ page }, testInfo) => {
 			const response = await page.goto(path, { waitUntil: 'networkidle' })
 			if (!response || !response.ok()) {
 				throw new Error(`${path} returned ${response?.status() ?? 'no response'}`)
 			}
 			await page.evaluate(() => document.fonts.ready)
+			await page.screenshot({ fullPage: true, path: testInfo.outputPath('full-page.png') })
 		})
 	}
 })

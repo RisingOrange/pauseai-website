@@ -6,8 +6,7 @@ export default defineConfig({
 	retries: process.env.CI ? 1 : 0,
 	reporter: [['list'], ['html', { open: 'never' }]],
 	use: {
-		baseURL: 'http://localhost:4173',
-		screenshot: 'on'
+		baseURL: 'http://localhost:4173'
 	},
 	projects: [
 		{
