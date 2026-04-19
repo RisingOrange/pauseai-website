@@ -3,7 +3,7 @@ import { ROUTES } from './routes'
 
 for (const path of ROUTES) {
 	test(`visit ${path}`, async ({ page }) => {
-		await page.goto(path)
+		await page.goto(path, { waitUntil: 'networkidle' })
 		await page.evaluate(() => document.fonts.ready)
 	})
 }

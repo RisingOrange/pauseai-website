@@ -1,27 +1,26 @@
-import { readdirSync } from 'node:fs'
+import { existsSync, readdirSync } from 'node:fs'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 const here = dirname(fileURLToPath(import.meta.url))
 const ROUTES_DIR = join(here, '../../src/routes')
 
-// Route dirs that aren't real pages or aren't useful to snapshot.
-const EXCLUDE_ROUTE_DIRS = new Set([
-	'api',
-	'[slug]',
-	'posts',
-	'rss.xml',
-	'sitemap.txt',
-	'sitemap.xml',
-	'email-builder', // admin-only tool
-	'submitted', // post-form state
-	'verify', // token-dependent
-	'uk-email-mp', // form flow
-	'contact-us', // form state
-	'chat', // OpenAI-dependent
-	'quotes' // ~22,000px tall — exceeds Chromatic's 25M-pixel snapshot cap
+// Pages intentionally skipped — covered by filesystem filter only if they'd
+// otherwise be discovered.
+const EXCLUDE_ROUTES = new Set([
+	'/email-builder', // admin-only tool
+	'/submitted', // post-form state
+	'/verify', // token-dependent
+	'/uk-email-mp', // form flow
+	'/contact-us', // form state
+	'/chat', // OpenAI-dependent
+	'/quotes' // ~22,000px tall — exceeds Chromatic's 25M-pixel snapshot cap
 	// /sayno top-level is included; /sayno/[id] has random IDs but isn't prerendered
 ])
+
+function hasPage(dir: string): boolean {
+	return existsSync(join(dir, '+page.svelte')) || existsSync(join(dir, '+page.ts'))
+}
 
 // Markdown posts (rendered via [slug]) that share the same layout — pick a few
 // representatives so we catch regressions to the post layout without snapshotting
@@ -38,8 +37,11 @@ function discoverRouteDirs(): string[] {
 	const routes: string[] = ['/']
 	for (const entry of readdirSync(ROUTES_DIR, { withFileTypes: true })) {
 		if (!entry.isDirectory()) continue
-		if (EXCLUDE_ROUTE_DIRS.has(entry.name)) continue
-		routes.push('/' + entry.name)
+		if (entry.name.startsWith('[')) continue // dynamic segment, can't visit directly
+		if (!hasPage(join(ROUTES_DIR, entry.name))) continue
+		const route = '/' + entry.name
+		if (EXCLUDE_ROUTES.has(route)) continue
+		routes.push(route)
 	}
 	return routes
 }
