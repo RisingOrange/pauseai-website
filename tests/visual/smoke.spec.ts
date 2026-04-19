@@ -1,16 +1,5 @@
 import { test } from '@chromatic-com/playwright'
-
-const ROUTES = [
-	'/',
-	'/outcomes',
-	'/funding',
-	'/donate',
-	'/action',
-	'/learn',
-	'/about',
-	'/communities',
-	'/press'
-]
+import { ROUTES } from './routes'
 
 for (const path of ROUTES) {
 	test(`visit ${path}`, async ({ page }) => {
