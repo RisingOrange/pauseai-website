@@ -15,6 +15,12 @@ test.describe('routes', () => {
 		await page.route('**/api/news*', (route) =>
 			route.fulfill({ status: 200, contentType: 'application/json', body: newsFixture })
 		)
+		// Block Tally form embeds (used on /statement and /join). Tally's iframe
+		// reports its content height back to the parent async, producing ~20px
+		// height deltas between runs. With the iframe blocked, the container
+		// collapses to its CSS size — deterministic. We lose no coverage: the
+		// iframe content isn't visible to Chromatic anyway.
+		await page.route('**/tally.so/**', (route) => route.abort())
 	})
 
 	for (const path of ROUTES) {
