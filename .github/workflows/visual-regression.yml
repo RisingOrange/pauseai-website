@@ -1,4 +1,4 @@
-name: Visual diff (Chromatic)
+name: Visual regression (Chromatic)
 
 on:
   push:
@@ -63,8 +63,8 @@ jobs:
       - name: Publish to Chromatic
         # Inlined plaintext token — Chromatic's own recommended pattern for fork-PR
         # support (forks can't read repo secrets). The token is a project-scoped
-        # write credential (submit builds, propose baselines for this project
-        # only), rotatable from the Chromatic UI. See
+        # write credential (anyone with it can run builds and consume snapshot
+        # quota for this project), rotatable from the Chromatic UI. See
         # https://www.chromatic.com/docs/github-actions/ for the full rationale
         # and any capability/scope details.
         uses: chromaui/action@v16
