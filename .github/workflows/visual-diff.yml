@@ -1,4 +1,4 @@
-name: Visual regression (Chromatic)
+name: Visual diff (Chromatic)
 
 on:
   push:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: visual-regression-${{ github.ref }}
+  group: visual-diff-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
