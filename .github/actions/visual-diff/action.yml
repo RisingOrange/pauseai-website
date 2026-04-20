@@ -25,7 +25,7 @@ runs:
       uses: actions/cache@v4
       with:
         path: node_modules/.cache/imagetools
-        key: imagetools-${{ runner.os }}-${{ hashFiles('src/**/*.{png,jpg,jpeg,webp,avif,svg}', 'static/**/*.{png,jpg,jpeg,webp,avif,svg}') }}
+        key: imagetools-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml', 'vite.config.ts', 'src/**/*.{png,jpg,jpeg,webp,avif,svg}', 'static/**/*.{png,jpg,jpeg,webp,avif,svg}') }}
         restore-keys: |
           imagetools-${{ runner.os }}-
     - name: Cache Playwright browsers
