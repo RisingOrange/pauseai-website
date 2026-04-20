@@ -9,7 +9,6 @@ const ADDITIONALLY_ENTRY_POINTS = [
 const config: KnipConfig = {
 	include: ['dependencies', 'exports'],
 	ignore: getIgnores(),
-	ignoreDependencies: ['chromatic'],
 	entry: ADDITIONALLY_ENTRY_POINTS
 }
 

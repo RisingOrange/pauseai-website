@@ -56,9 +56,10 @@ runs:
         retention-days: 14
     - name: Publish to Chromatic
       # Skip when token is empty (fork PRs on `pull_request` — can't read secrets).
-      # chromaui/action@v1 bundles an outdated CLI; invoke the local install instead.
       if: inputs.chromatic-token != ''
-      shell: bash
-      env:
-        CHROMATIC_PROJECT_TOKEN: ${{ inputs.chromatic-token }}
-      run: pnpm exec chromatic --playwright --exit-zero-on-changes --exit-once-uploaded
+      uses: chromaui/action@v16
+      with:
+        playwright: true
+        projectToken: ${{ inputs.chromatic-token }}
+        exitZeroOnChanges: true
+        exitOnceUploaded: true
