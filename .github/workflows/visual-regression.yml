@@ -22,4 +22,10 @@ jobs:
           fetch-depth: 0
       - uses: ./.github/actions/visual-diff
         with:
-          chromatic-token: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+          # Inlined plaintext — Chromatic's own recommended pattern for fork-PR
+          # support (forks can't read repo secrets). The token is a project-scoped
+          # write credential (submit builds, propose baselines for this project
+          # only), rotatable from the Chromatic UI. See
+          # https://www.chromatic.com/docs/github-actions/ for the full rationale
+          # and any capability/scope details.
+          chromatic-token: chpt_cefd614c783fb5c
