@@ -37,10 +37,3 @@ CLAUDE.md
 # Playwright
 /test-results
 /playwright-report
-/blob-report
-/playwright/.cache
-
-# Chromatic
-/build-archive.log
-/chromatic.log
-/chromatic-diagnostics.json

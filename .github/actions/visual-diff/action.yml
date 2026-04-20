@@ -1,0 +1,65 @@
+name: Visual diff (shared steps)
+description: Install deps, run Playwright, upload report, publish to Chromatic.
+
+inputs:
+  chromatic-token:
+    description: Chromatic project token. When empty (fork PRs on `pull_request`), the publish step is skipped.
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v5
+    - name: Setup Node.js
+      uses: actions/setup-node@v6
+      with:
+        node-version-file: '.nvmrc'
+        cache: 'pnpm'
+    - name: Copy environment file
+      shell: bash
+      run: cp template.env .env
+    - name: Install dependencies
+      shell: bash
+      run: pnpm install --frozen-lockfile
+    - name: Cache imagetools transforms
+      uses: actions/cache@v4
+      with:
+        path: node_modules/.cache/imagetools
+        key: imagetools-${{ runner.os }}-${{ hashFiles('src/**/*.{png,jpg,jpeg,webp,avif,svg}', 'static/**/*.{png,jpg,jpeg,webp,avif,svg}') }}
+        restore-keys: |
+          imagetools-${{ runner.os }}-
+    - name: Cache Playwright browsers
+      id: playwright-cache
+      uses: actions/cache@v4
+      with:
+        path: ~/.cache/ms-playwright
+        key: playwright-${{ runner.os }}-${{ hashFiles('pnpm-lock.yaml') }}
+        restore-keys: |
+          playwright-${{ runner.os }}-
+    - name: Install Playwright (browser + deps on cache miss)
+      if: steps.playwright-cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: pnpm exec playwright install --with-deps chromium
+    - name: Install Playwright system deps (cache hit)
+      if: steps.playwright-cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: pnpm exec playwright install-deps chromium
+    - name: Run Playwright tests
+      shell: bash
+      run: pnpm exec playwright test
+    - name: Upload Playwright report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: playwright-report
+        path: playwright-report/
+        retention-days: 14
+    - name: Publish to Chromatic
+      # Skip when token is empty (fork PRs on `pull_request` — can't read secrets).
+      if: inputs.chromatic-token != ''
+      uses: chromaui/action@v1
+      with:
+        playwright: true
+        projectToken: ${{ inputs.chromatic-token }}
+        exitZeroOnChanges: true
+        exitOnceUploaded: true
