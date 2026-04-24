@@ -37,3 +37,4 @@ Open Chromatic from the PR's check. It offers side-by-side viewers; accept or de
 - **Opt a page out:** add `<!-- @visualDiffEnabled: false — reason -->` (or `// @visualDiffEnabled: false — reason` in a `.ts` file) near the top of the page's source file. The comment lives with the page, so renames carry it along.
 - **Opt a post in:** add `<!-- @visualDiffEnabled: true — reason -->` just below the post's frontmatter in `src/posts/<slug>.md`. Posts default to excluded (100+ would be too many); sample only posts covering distinct layout variants.
 - **Add a new external-data integration:** add a handler in `msw-handlers.ts` with a fixture in `fixtures/`. Don't leave a new integration unmocked — without secrets in CI, it will either fail or produce non-deterministic snapshots. (`page.route()` is only for aborts, not for serving fixture data.)
+<!-- visual-diff-scenario: normal PR -->
