@@ -69,6 +69,11 @@ const getGroupKey = (order: number | undefined): string => {
 }
 
 export const GET: RequestHandler = async ({ fetch, setHeaders }) => {
+	// Scenario 3 test: deliberately call an un-fixtured upstream so the MSW
+	// `request:unhandled` listener logs it, and the visual-diff PR comment
+	// surfaces an "⚠️ un-fixtured requests" warning section.
+	await fetch('https://api.example.test/scenario-3-marker').catch(() => null)
+
 	const url = `https://api.airtable.com/v0/appWPTGqZmUcs3NWu/tblL1icZBhTV1gQ9o`
 	setHeaders(generateCacheControlRecord({ public: true, maxAge: 60 * 60 }))
 
