@@ -10,14 +10,14 @@ const client = axios.create({
 
 axiosRetry(client, {
 	retries: 3,
-	retryDelay: axiosRetry.exponentialDelay,
+	retryDelay: (retryCount, error) => axiosRetry.exponentialDelay(retryCount, error),
 	retryCondition: (error) => {
 		return axiosRetry.isNetworkOrIdempotentRequestError(error) || error.response?.status === 429
 	}
 })
 
 client.interceptors.request.use((request) => {
-	request.params = snakecaseKeys(request.params)
+	request.params = snakecaseKeys(request.params as Record<string, unknown>)
 	return request
 })
 
