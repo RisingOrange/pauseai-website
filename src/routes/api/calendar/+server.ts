@@ -32,16 +32,15 @@ export const GET: RequestHandler = async ({ url, setHeaders }) => {
 	const daysStr = url.searchParams.get('days')
 	const days = daysStr ? parseInt(daysStr) : null
 
-	// We fetch sequentially to avoid 429 rate limit errors from Luma
-	const allItems = []
-	for (const id of CALENDAR_IDS) {
-		const items = await Calendar.getItems({
-			calendarApiId: id,
-			period: 'future',
-			paginationLimit: 20
-		})
-		allItems.push(items)
-	}
+	const allItems = await Promise.all(
+		CALENDAR_IDS.map((id) =>
+			Calendar.getItems({
+				calendarApiId: id,
+				period: 'future',
+				paginationLimit: 20
+			})
+		)
+	)
 
 	const mergedEntries = allItems.flatMap((items) =>
 		items.entries.map((entry) => ({
