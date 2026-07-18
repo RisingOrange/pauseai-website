@@ -2,14 +2,42 @@ import { enhancedImages } from '@sveltejs/enhanced-img'
 import { sveltekit } from '@sveltejs/kit/vite'
 import { execSync } from 'child_process'
 import dotenv from 'dotenv'
+import { FontaineTransform } from 'fontaine'
 import fs from 'fs'
 import path from 'path'
-import { defineConfig } from 'vite'
+import discardDuplicates from 'postcss-discard-duplicates'
+import { defineConfig, type Plugin } from 'vite'
 import lucidePreprocess from 'vite-plugin-lucide-preprocess'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { isDev } from './src/lib/env'
 import { MARKDOWN_L10NS } from './src/lib/l10n'
 import { locales as compiledLocales } from './src/lib/paraglide/runtime.js'
+import { configDefaults } from 'vitest/config'
+
+/**
+ * Dev-only middleware: Netlify's `/.netlify/*` routes don't exist in the
+ * SvelteKit dev server. Without this, every such request logs a full stack
+ * trace. Intercept early and respond with a short console note instead.
+ */
+function suppressNetlifyRoute404s(): Plugin {
+	return {
+		name: 'pauseai:suppress-netlify-route-404s',
+		apply: 'serve',
+		configureServer(server) {
+			server.middlewares.use((req, res, next) => {
+				const url = req.url ?? ''
+				if (url.startsWith('/.netlify/')) {
+					console.warn(`[dev] 404 ${url} — Netlify routes are not served locally`)
+					res.statusCode = 404
+					res.setHeader('Content-Type', 'text/plain')
+					res.end('Not found: Netlify routes are not served in dev')
+					return
+				}
+				next()
+			})
+		}
+	}
+}
 
 function getSentryRelease(): string | undefined {
 	try {
@@ -37,8 +65,12 @@ function getLocaleExcludePatterns(): RegExp[] {
 }
 
 export default defineConfig(() => {
-	// Guarantees server can see .env (on e.g. hot restart)
-	dotenv.config({ override: true })
+	// Guarantees server can see .env (on e.g. hot restart). In visual-diff
+	// runs we flip `override` off so the shell-set fake API keys win over
+	// the empty values in .env (copied from template.env) — otherwise the
+	// Airtable/Notion SDKs short-circuit on empty key before making any
+	// request, and MSW never gets to intercept and serve the fixture.
+	dotenv.config({ override: process.env.VISUAL_TEST !== '1' })
 
 	return {
 		define: {
@@ -50,6 +82,14 @@ export default defineConfig(() => {
 			fs: {
 				// Allow serving files from l10n-cage directory
 				allow: [MARKDOWN_L10NS]
+			}
+		},
+
+		css: {
+			// Fontaine generates one fallback @font-face per src URL × unicode-range
+			// subset, which are metric-identical copies; collapse them.
+			postcss: {
+				plugins: [discardDuplicates()]
 			}
 		},
 
@@ -67,9 +107,34 @@ export default defineConfig(() => {
 				external: getLocaleExcludePatterns()
 			}
 		} as const,
+
+		// Vitest config — `pnpm test` runs Vitest, which by default would
+		// also pick up `tests/visual/smoke.spec.ts`. That file imports
+		// `test` from `@chromatic-com/playwright` (a Playwright test runner
+		// wrapper), and Playwright's `test.describe()` throws
+		// "did not expect test.describe() to be called here" when invoked
+		// outside the Playwright runner. The visual suite is launched
+		// separately via `playwright.config.ts` (and Chromatic), so exclude
+		// it from Vitest's discovery. `exclude` replaces Vitest's defaults,
+		// so spread `configDefaults.exclude` to keep node_modules / dist /
+		// cypress / config files filtered out.
+		test: {
+			exclude: [...configDefaults.exclude, 'tests/visual/**']
+		},
 		plugins: [
+			suppressNetlifyRoute404s(),
 			lucidePreprocess(),
 			enhancedImages(),
+			// Generates "<font> fallback" @font-face rules whose metrics match the webfonts,
+			// so text doesn't shift when they swap in (see --font-* variables in styles.css).
+			// Each list needs fonts that resolve via src:local() across platforms —
+			// Tinos/Arimo/Noto cover Linux, where Times/Georgia/Arial don't exist.
+			FontaineTransform.vite({
+				fallbacks: {
+					'Roboto Slab': ['Georgia', 'Times New Roman', 'Tinos', 'Noto Serif'],
+					'Saira Condensed': ['Arial', 'Arimo', 'Noto Sans']
+				}
+			}),
 			sveltekit(),
 			!isDev(process.env) &&
 			process.env.SENTRY_AUTH_TOKEN &&

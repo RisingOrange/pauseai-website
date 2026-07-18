@@ -8,6 +8,7 @@ import { defineConfig, globalIgnores } from 'eslint/config'
 import globals from 'globals'
 import ts from 'typescript-eslint'
 import emptyMarkdownLinks from './eslint/plugin-empty-markdown-links.js'
+import markdownScripts from './eslint/plugin-markdown-scripts.js'
 import svelteConfig from './svelte.config.js'
 
 // See https://typescript-eslint.io/troubleshooting/typed-linting/performance#changes-to-extrafileextensions-with-projectservice
@@ -64,7 +65,11 @@ export default defineConfig(
 	},
 	{
 		files: ['src/posts/**/*.md'],
+		plugins: {
+			markdownScripts
+		},
 		rules: {
+			'markdownScripts/no-script-with-src': 'error',
 			'no-restricted-syntax': [
 				'error',
 				{
@@ -80,7 +85,7 @@ export default defineConfig(
 		// See more details at: https://typescript-eslint.io/packages/parser/
 		languageOptions: {
 			parserOptions: {
-				project: ['./tsconfig.check.json'],
+				project: ['./tsconfig.json'],
 				// Defined globally instead:
 				// extraFileExtensions: ['.svelte'], // Add support for additional file extensions, such as .svelte
 				parser: ts.parser,

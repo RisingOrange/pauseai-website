@@ -13,6 +13,7 @@ vite.config.ts.timestamp-*
 .env
 
 # alternative package managers
+bun.lock
 bun.lockb
 deno.lock
 
@@ -33,3 +34,13 @@ CLAUDE.md
 .env.sentry-build-plugin
 
 .prettierignore
+.playwright-mcp/
+
+# Playwright
+/test-results
+/playwright-report
+
+# Chromatic (only produced by local CLI runs, not CI)
+/build-archive.log
+/chromatic.log
+/chromatic-diagnostics.json
